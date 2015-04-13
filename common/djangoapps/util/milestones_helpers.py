@@ -7,7 +7,7 @@ from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from opaque_keys import InvalidKeyError
-from opaque_keys.edx.keys import CourseKey, UsageKey
+from opaque_keys.edx.keys import CourseKey
 from xmodule.modulestore.django import modulestore
 
 NAMESPACE_CHOICES = {
@@ -26,7 +26,7 @@ def add_prerequisite_course(course_key, prerequisite_course_key):
     """
     It would create a milestone, then it would set newly created
     milestones as requirement for course referred by `course_key`
-    and it would set newly created milestone as fulfilment
+    and it would set newly created milestone as fulfillment
     milestone for course referred by `prerequisite_course_key`.
     """
     if not settings.FEATURES.get('ENABLE_PREREQUISITE_COURSES', False):
@@ -91,6 +91,10 @@ def get_pre_requisite_courses_not_completed(user, enrolled_courses):
     user has enrolled in. It calls the fulfilment api of milestones app and
     iterates over all fulfilment milestones not achieved to make dict of
     prerequisite courses yet to be completed.
+
+    Args:
+        user (str): Name of the user
+        enrolled_courses (list): List of the courses user is enrolled in
     """
     pre_requisite_courses = {}
     if settings.FEATURES.get('ENABLE_PREREQUISITE_COURSES', False):
