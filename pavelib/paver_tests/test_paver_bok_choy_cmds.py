@@ -1,6 +1,7 @@
 
 import os
 import unittest
+from mock import patch
 from pavelib.utils.test.suites.bokchoy_suite import BokChoyTestSuite
 
 REPO_DIR = os.getcwd()
@@ -8,6 +9,7 @@ REPO_DIR = os.getcwd()
 
 class TestPaverBokChoyCmd(unittest.TestCase):
 
+    @patch.dict('os.environ', {"UNIQUE_TEST_REPORT_DIR": '0'})
     def setUp(self):
         self.request = BokChoyTestSuite('')
 

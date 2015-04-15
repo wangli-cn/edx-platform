@@ -1,6 +1,8 @@
 """
 Class used for defining and running Bok Choy acceptance test suite
 """
+import os
+import uuid
 from paver.easy import sh
 from pavelib.utils.test.suites import TestSuite
 from pavelib.utils.envs import Env
@@ -32,6 +34,15 @@ class BokChoyTestSuite(TestSuite):
         self.test_dir = Env.BOK_CHOY_DIR / kwargs.get('test_dir', 'tests')
         self.log_dir = Env.BOK_CHOY_LOG_DIR
         self.report_dir = Env.BOK_CHOY_REPORT_DIR
+
+        # If set, put reports for run in "unique" directories.
+        # The main purpose of this is to ensure that the reports can be 'slurped'
+        # in the main jenkins flow job without overwriting the reports from other
+        # build steps. For local development/testing, this shouldn't be needed.
+        if int(os.environ.get("UNIQUE_TEST_REPORT_DIR", 0)):
+            self.report_dir = self.report_dir / uuid.uuid4().hex
+            self.log_dir = self.log_dir / uuid.uuid4().hex
+
         self.xunit_report = self.report_dir / "xunit.xml"
         self.cache = Env.BOK_CHOY_CACHE
         self.fasttest = kwargs.get('fasttest', False)

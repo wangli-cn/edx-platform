@@ -2,6 +2,7 @@
 Classes used for defining and running nose test suites
 """
 import os
+import uuid
 from paver.easy import call_task
 from pavelib.utils.test import utils as test_utils
 from pavelib.utils.test.suites import TestSuite
@@ -21,6 +22,14 @@ class NoseTestSuite(TestSuite):
         self.fail_fast = kwargs.get('fail_fast', False)
         self.run_under_coverage = kwargs.get('with_coverage', True)
         self.report_dir = Env.REPORT_DIR / self.root
+
+        # If set, put reports for run in "unique" directories.
+        # The main purpose of this is to ensure that the reports can be 'slurped'
+        # in the main jenkins flow job without overwriting the reports from other
+        # build steps. For local development/testing, this shouldn't be needed.
+        if int(os.environ.get("UNIQUE_TEST_REPORT_DIR", 0)):
+            self.report_dir = self.report_dir / uuid.uuid4().hex
+
         self.test_id_dir = Env.TEST_DIR / self.root
         self.test_ids = self.test_id_dir / 'noseids'
         self.extra_args = kwargs.get('extra_args', '')
@@ -109,12 +118,14 @@ class SystemTestSuite(NoseTestSuite):
     def cmd(self):
         cmd = (
             './manage.py {system} test --verbosity={verbosity} '
-            '{test_id} {test_opts} --traceback --settings=test {extra}'.format(
+            '{test_id} {test_opts} --traceback --settings=test {extra} '
+            '--with-xunit --xunit-file={xunit_report}'.format(
                 system=self.root,
                 verbosity=self.verbosity,
                 test_id=self.test_id,
                 test_opts=self.test_options_flags,
                 extra=self.extra_args,
+                xunit_report=self.report_dir / "nosetests.xml",
             )
         )
 
