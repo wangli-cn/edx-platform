@@ -87,3 +87,10 @@ class CoursewarePage(CoursePage):
                 return False
 
         return True
+
+    @property
+    def course_license(self):
+        element = self.q(css="#content .container-footer .course-license")
+        if element.is_present():
+            return element.text[0]
+        return None
