@@ -405,6 +405,7 @@ class AdvancedSettingsValidationTest(StudioCourseTest):
         self.assertEquals(set(displayed_fields), set(expected_fields))
 
 
+
 @attr('shard_1')
 class ContentLicenseTest(StudioCourseTest):
     def setUp(self):
