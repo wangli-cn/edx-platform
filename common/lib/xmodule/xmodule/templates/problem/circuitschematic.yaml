@@ -3,9 +3,9 @@ metadata:
     display_name: Circuit Schematic Builder
     markdown: !!null
 data: |
-      <problem >
-        Please make a voltage divider that splits the provided voltage evenly.
-    
+      <problem>
+        <fieldset>
+          <legend>Make a voltage divider that splits the provided voltage evenly.</legend>
       <schematicresponse>
       <center>
       <schematic height="500" width="600" parts="g,r" analyses="dc"
@@ -25,8 +25,10 @@ data: |
         correct = ['incorrect']
       </answer>
       </schematicresponse>
+      </fieldset>
+      <fieldset>
+      <legend>Make a high-pass filter.</legend>
       <schematicresponse>
-      <p>Make a high pass filter</p>
       <center>
       <schematic height="500" width="600" parts="g,r,s,c" analyses="ac"
       submit_analyses="{&quot;ac&quot;:[[&quot;NodeA&quot;,1,9]]}"
@@ -47,13 +49,14 @@ data: |
         correct = ['incorrect']
       </answer>
       </schematicresponse>
+      </fieldset>
     
           <solution>
               <div class="detailed-solution">
                   <p>Explanation</p>
-                  <p>A voltage divider that evenly divides the input voltage can be formed with two identically valued resistors, with the sampled voltage taken in between the two.</p>
+                  <p>You can form a voltage divider that evenly divides the input voltage with two identically valued resistors, with the sampled voltage taken in between the two.</p>
                   <p><img src="/static/images/voltage_divider.png"/></p>
-                  <p>A simple high-pass filter without any further constaints can be formed by simply putting a resister in series with a capacitor. The actual values of the components do not really matter in order to meet the constraints of the problem.</p>
+                  <p>You can form a simple high-pass filter without any further constaints by simply putting a resistor in series with a capacitor. The actual values of the components do not really matter in this problem.</p>
                   <p><img src="/static/images/high_pass_filter.png"/></p>
               </div>
           </solution>
