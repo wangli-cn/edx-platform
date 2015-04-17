@@ -429,6 +429,7 @@ class ImportManager(object):
 
                 # Import all children
                 self.import_children(source_courselike, courselike, courselike_key, data_path, dest_id)
+
             yield courselike
 
 
@@ -770,15 +771,15 @@ def _import_course_draft(
         for child in module.get_children():
             _import_module(child)
 
-    # Now walk the /vertical directory.
+    # Now walk the /drafts directory.
     # Each file in the directory will be a draft copy of the vertical.
 
     # First it is necessary to order the draft items by their desired index in the child list,
     # since the order in which os.walk() returns the files is not guaranteed.
     drafts = []
-    for dirname, _dirnames, filenames in os.walk(draft_dir):
+    for rootdir, __, filenames in os.walk(draft_dir):
         for filename in filenames:
-            module_path = os.path.join(dirname, filename)
+            module_path = os.path.join(rootdir, filename)
             with open(module_path, 'r') as f:
                 try:
                     # note, on local dev it seems like OSX will put
