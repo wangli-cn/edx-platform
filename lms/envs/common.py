@@ -378,6 +378,8 @@ FEATURES = {
         'TWITTER_SHARING': False,
         'TWITTER_SHARING_TEXT': None
     },
+
+    'LICENSING': True,
 }
 
 # Ignore static asset files on import which match this pattern

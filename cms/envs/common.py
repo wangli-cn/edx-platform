@@ -156,7 +156,9 @@ FEATURES = {
     'DASHBOARD_SHARE_SETTINGS': {
         # Note: Ensure 'CUSTOM_COURSE_URLS' has a matching value in lms/envs/common.py
         'CUSTOM_COURSE_URLS': False
-    }
+    },
+
+    'LICENSING': True,
 }
 
 ENABLE_JASMINE = False
