@@ -23,6 +23,7 @@ from xmodule.modulestore.django import modulestore
 from xmodule.split_test_module import get_split_user_partitions
 
 from certificates.models import CertificateWhitelist, CertificateStatuses, certificate_status_for_student
+from course_modes.models import CourseMode
 from courseware.courses import get_course_by_id, get_problems_in_section
 from courseware.grades import iterate_grades_for
 from courseware.models import StudentModule
@@ -586,11 +587,7 @@ def certificate_type(certificate_status):
 
 def generate_certificates_data(user, course_id, grade):
     """
-    Generates & return the data related to the certificates.
-    :param user: User object
-    :param course_id: ID of the course
-    :param grade: grade value
-    :return: Column list for certificate data.
+    Generates and return the user data related to the certificates for a particular course.
     """
 
     user_in_white_list = CertificateWhitelist.objects.filter(user=user, course_id=course_id, whitelist=True).exists()
@@ -612,13 +609,14 @@ def generate_certificates_data(user, course_id, grade):
         is_delivered = 'N'
         cert_type = 'N/A'
 
+    user_enrollment_mode = CourseEnrollment.enrollment_mode_for_user(user, course_id)[0]
     # Respective data fields are listed below:
     # ['Certificate Eligible', 'Certificate Delivered', 'Enrollment Track', 'Verification Status','Certificate Type']
     data = [
         is_eligible,
         is_delivered,
-        CourseEnrollment.enrollment_mode_for_user(user, course_id)[0],
-        verification_status(user, course_id),
+        user_enrollment_mode,
+        verification_status(user, course_id) if user_enrollment_mode in CourseMode.VERIFIED_MODES else 'ID Verified',
         cert_type
     ]
     return data

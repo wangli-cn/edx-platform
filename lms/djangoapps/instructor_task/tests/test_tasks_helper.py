@@ -11,18 +11,27 @@ from mock import Mock, patch
 import tempfile
 import unicodecsv
 
-from xmodule.modulestore.tests.factories import CourseFactory
-from student.tests.factories import UserFactory
-from student.models import CourseEnrollment
-from xmodule.partitions.partitions import Group, UserPartition
-
+from capa.tests.response_xml_factory import MultipleChoiceResponseXMLFactory
+from certificates.tests.factories import GeneratedCertificateFactory
+from certificates.models import CertificateWhitelist, CertificateStatuses
+from django.contrib.auth.models import User
+from course_modes.models import CourseMode
+from instructor_task.models import ReportStore
+from instructor_task.tasks_helper import (cohort_students_and_upload,
+                                          upload_grades_csv,
+                                          upload_students_csv,
+                                          generate_certificates_data)
+from instructor_task.tests.test_base import InstructorTaskCourseTestCase, TestReportMixin, InstructorTaskModuleTestCase
 from openedx.core.djangoapps.course_groups.models import CourseUserGroupPartitionGroup
 from openedx.core.djangoapps.course_groups.tests.helpers import CohortFactory
 import openedx.core.djangoapps.user_api.course_tag.api as course_tag_api
 from openedx.core.djangoapps.user_api.partition_schemes import RandomUserPartitionScheme
-from instructor_task.models import ReportStore
-from instructor_task.tasks_helper import cohort_students_and_upload, upload_grades_csv, upload_students_csv
-from instructor_task.tests.test_base import InstructorTaskCourseTestCase, TestReportMixin
+from student.tests.factories import UserFactory, UserProfileFactory
+from student.models import CourseEnrollment
+from reverification.tests.factories import MidcourseReverificationWindowFactory
+from verify_student.models import SoftwareSecurePhotoVerification
+from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
+from xmodule.partitions.partitions import Group, UserPartition
 
 
 @ddt.ddt
@@ -250,7 +259,7 @@ class TestInstructorGradeReport(TestReportMixin, InstructorTaskCourseTestCase):
         mock_iterate_grades_for.return_value = [
             (
                 self.create_student('username', 'student@example.com'),
-                {'section_breakdown': [{'label': u'\u8282\u540e\u9898 01'}], 'percent': 0},
+                {'section_breakdown': [{'label': u'\u8282\u540e\u9898 01'}], 'percent': 0, 'grade': None},
                 'Cannot grade student'
             )
         ]
@@ -537,4 +546,176 @@ class TestCohortStudents(TestReportMixin, InstructorTaskCourseTestCase):
                 dict(zip(self.csv_header_row, ['Cohort 2', 'True', '0', ''])),
             ],
             verify_order=False
+        )
+
+
+@patch('instructor_task.tasks_helper.DefaultStorage', new=MockDefaultStorage)
+class TestGradeReportCertificateInfo(TestReportMixin, InstructorTaskModuleTestCase):
+    """
+    """
+    def setUp(self):
+        super(TestGradeReportCertificateInfo, self).setUp()
+
+        self.initialize_course()
+
+        self.create_problem()
+
+        self.csv_cert_info_header = [
+            'Certificate Eligible',
+            'Certificate Delivered',
+            'Enrollment Track',
+            'Verification Status',
+            'Certificate Type'
+        ]
+
+    def create_problem(self, problem_display_name='test_problem', parent=None):
+        """
+        Create a multiple choice response problem.
+        """
+        if parent is None:
+            parent = self.problem_section
+
+        factory = MultipleChoiceResponseXMLFactory()
+        args = {'choices': [False, True, False]}
+        problem_xml = factory.build_xml(**args)
+        ItemFactory.create(
+            parent_location=parent.location,
+            parent=parent,
+            category="problem",
+            display_name=problem_display_name,
+            data=problem_xml
+        )
+
+    def generate_certificate(self, user, course_id, status, mode):
+        """
+        Generate certificates for users.
+        """
+        GeneratedCertificateFactory.create(
+            user=user,
+            course_id=course_id,
+            status=status,
+            mode=mode
+        )
+
+    def user_in_whitelist(self, user, course_id, state):
+        """
+        Set a users whitelist state.
+        """
+        cert_whitelist, _ = CertificateWhitelist.objects.get_or_create(user=user, course_id=course_id)
+        cert_whitelist.whitelist = state
+        cert_whitelist.save()
+
+    def user_is_embargoed(self, user, state):
+        """
+        Set a users emabargo state.
+        """
+        user_profile = UserFactory(username=user.username, email=user.email).profile
+        user_profile.allow_certificate = not state
+        user_profile.save()
+
+    def set_user_verification_status(self, user, status):
+        """
+        Set a users verification status.
+        """
+        attempt, _ = SoftwareSecurePhotoVerification.objects.get_or_create(user=user)
+        attempt.status = status
+        attempt.save()
+
+    def _verify_csv_certificate_data(self, username, expected_data):
+        with patch('instructor_task.tasks_helper._get_current_task'):
+            upload_grades_csv(None, None, self.course.id, None, 'graded')
+            report_store = ReportStore.from_config()
+            report_csv_filename = report_store.links_for(self.course.id)[0][0]
+            with open(report_store.path_to(self.course.id, report_csv_filename)) as csv_file:
+                for row in unicodecsv.DictReader(csv_file):
+                    if row.get('username') == username:
+                        csv_row_data = [row[column] for column in self.csv_cert_info_header]
+                        self.assertEqual(csv_row_data, expected_data)
+
+    def _create_user_data(self,
+                          user_enroll_mode,
+                          has_passed,
+                          whitelisted,
+                          embargoed,
+                          verification_status,
+                          certificate_status,
+                          certificate_mode,
+                          expected_data):
+
+        self.create_student('u1', mode=user_enroll_mode)
+        user = User.objects.get(username='u1')
+
+        if has_passed:
+            self.submit_student_answer('u1', 'test_problem', ['choice_1'])
+
+        self.user_in_whitelist(user, self.course.id, whitelisted)
+
+        self.user_is_embargoed(user, embargoed)
+
+        if user_enroll_mode in CourseMode.VERIFIED_MODES:
+            self.set_user_verification_status(user, verification_status)
+
+        self.generate_certificate(user, self.course.id, certificate_status, certificate_mode)
+
+        # Verify columns values in grade report
+        self._verify_csv_certificate_data(user.username, expected_data)
+
+    def test_failed_non_whitelist_user_certificate_info(self):
+        """
+        Verify certificate info for failed user who is not in whitelist.
+        """
+        self._create_user_data(
+            user_enroll_mode='verified',
+            has_passed=False,
+            whitelisted=False,
+            embargoed=False,
+            verification_status='approved',
+            certificate_status='notpassing',
+            certificate_mode='honor',
+            expected_data=['N', 'N', 'verified', 'ID Verified', 'N/A']
+        )
+
+    def test_failed_whitelist_user_certificate_info(self):
+        """
+        Verify certificate info for failed user who is in whitelist.
+        """
+        self._create_user_data(
+            user_enroll_mode='verified',
+            has_passed=False,
+            whitelisted=True,
+            embargoed=False,
+            verification_status='approved',
+            certificate_status='downloadable',
+            certificate_mode='verified',
+            expected_data=['Y', 'Y', 'verified', 'ID Verified', 'verified']
+        )
+
+    def test_embargoed_user_certificate_info(self):
+        """
+        Verify certificate info for emabargoed user.
+        """
+        self._create_user_data(
+            user_enroll_mode='honor',
+            has_passed=True,
+            whitelisted=True,
+            embargoed=True,
+            verification_status='approved',
+            certificate_status='restricted',
+            certificate_mode='honor',
+            expected_data=['N', 'N', 'honor', 'ID Verified', 'N/A']
+        )
+
+    def test_verification_expired_user_certificate_info(self):
+        """
+        Verify certificate info for a user whose verification is expired.
+        """
+        self._create_user_data(
+            user_enroll_mode='verified',
+            has_passed=True,
+            whitelisted=True,
+            embargoed=False,
+            verification_status='must_retry',
+            certificate_status='downloadable',
+            certificate_mode='honor',
+            expected_data=['Y', 'Y', 'verified', 'Not ID Verified', 'honor']
         )
