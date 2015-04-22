@@ -36,17 +36,14 @@
         set_mathjax_display_div_settings();
     }
   });
-</script>
-
-<script type="text/javascript">
   function set_mathjax_display_div_settings() {
-  $('.MathJax_Display').each(function( index ) {
-    this.setAttribute('tabindex', '0');
-    this.setAttribute('aria-live', 'off');
-    this.removeAttribute('role');
-    this.removeAttribute('aria-readonly');
+    $('.MathJax_Display').each(function( index ) {
+      this.setAttribute('tabindex', '0');
+      this.setAttribute('aria-live', 'off');
+      this.removeAttribute('role');
+      this.removeAttribute('aria-readonly');
     });
-    }
+  }
 </script>
 
 
