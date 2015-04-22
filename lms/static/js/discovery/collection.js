@@ -14,19 +14,31 @@ define([
         latestModelsCount: 0,
         searchTerm: '',
         page: 0,
-        url: '/search/course_discovery',
+        url: '/search/course_discovery/',
         fetchXhr: null,
 
         performSearch: function (searchTerm) {
             this.fetchXhr && this.fetchXhr.abort();
-            this.searchTerm = searchTerm || '';
+            var search_term_pieces = searchTerm.split(" ");
+            var data = {
+                page_size: this.pageSize,
+                page_index: 0
+            };
+            var search_term_builder = [];
+            for (var i = 0; i < search_term_pieces.length; i++) {
+                if(search_term_pieces[i].indexOf(":") > 0){
+                    var name_value = search_term_pieces[i].split(":");
+                    data[name_value[0]] = name_value[1];
+                }
+                else {
+                    search_term_builder.push(search_term_pieces[i]);
+                }
+            };
+            this.searchTerm = search_term_builder.join(' ') || '';
+            data["search_string"] = this.searchTerm;
             this.resetState();
             this.fetchXhr = this.fetch({
-                data: {
-                    search_string: searchTerm,
-                    page_size: this.pageSize,
-                    page_index: 0
-                },
+                data: data,
                 type: 'POST',
                 success: function (self, xhr) {
                     self.trigger('search');
