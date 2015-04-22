@@ -500,7 +500,7 @@ class DraftVersioningModuleStore(SplitMongoModuleStore, ModuleStoreDraftAndPubli
                 draft_course = course_key.for_branch(ModuleStoreEnum.BranchName.draft)
                 with self.branch_setting(ModuleStoreEnum.Branch.draft_preferred, draft_course):
                     draft_block = self.import_xblock(user_id, draft_course, block_type, block_id, fields, runtime)
-                    return self.publish(draft_block.location.version_agnostic(), user_id, blacklist=EXCLUDE_ALL, **kwargs)
+                    # Don't publish the draft block here. Instead create the published block below.
 
             # do the import
             partitioned_fields = self.partition_fields_by_scope(block_type, fields)
