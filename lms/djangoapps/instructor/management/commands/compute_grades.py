@@ -3,7 +3,7 @@
 django management command: dump grades to csv files
 for use by batch processes
 """
-from instructor.offline_gradecalc import offline_grade_calculation
+# from instructor.offline_gradecalc import offline_grade_calculation
 from courseware.courses import get_course_by_id
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -14,6 +14,7 @@ from django.core.management.base import BaseCommand
 from django.test.client import RequestFactory
 from django.contrib.auth.models import User
 import instructor_task.api
+
 
 class Command(BaseCommand):
     help = "Compute grades for all students in a course, and store result in DB.\n"
@@ -53,8 +54,6 @@ class Command(BaseCommand):
         # from nose.tools import set_trace; set_trace()
         request = RequestFactory().get('dummy')
         request.user = User.objects.get(id=4)
-
-
 
         instructor_task.api.submit_calculate_grades_csv(request, course_key)
 
