@@ -4,6 +4,7 @@ running state of a course.
 
 """
 import json
+from collections import OrderedDict
 from datetime import datetime
 from time import time
 import unicodecsv
@@ -682,6 +683,44 @@ def upload_grades_csv(_xmodule_instance_args, _entry_id, course_id, _task_input,
     # One last update before we close out...
     TASK_LOG.info(u'%s, Task type: %s, Finalizing grade task', task_info_string, action_name)
     return task_progress.update_task_state(extra_meta=current_step)
+
+
+def upload_problem_grade_report(_xmodule_instance_args, _entry_id, course_id, _task_input, action_name):
+    """
+    Generate a CSV containing all students' problem grades within a given
+    `course_id`.
+    """
+    start_time = time()
+    start_date = datetime.now(UTC)
+    status_interval = 100
+    enrolled_students = CourseEnrollment.users_enrolled_in(course_id)
+    task_progress = TaskProgress(action_name, enrolled_students.count(), start_time)
+
+    # This struct encapsulates both the display names of each static item in
+    # the header row as values as well as the django User field names of those
+    # items as the keys.  It is structured in this way to keep the values
+    # related.
+    header_row = OrderedDict([('id', 'Student ID'), ('email', 'Email'), ('username', 'Username')])
+
+    # The algorithm will vaguely be:
+    # Generate the header row - static fields then all problems
+    # For each student in the course:
+    #   - First append their static fields
+    #   - Then iterate through each problem column, appending grade if appropriate
+
+    # Just generate the static fields for now.
+    rows = [[display_name for display_name in header_row.values()]]
+    current_step = {'step': 'Calculating Grades'}
+    for student in enrolled_students:
+        rows.append([getattr(student, field_name) for field_name in header_row])
+        task_progress.attempted +=1
+        task_progress.succeeded +=1
+        if task_progress.attempted % status_interval == 0:
+            task_progress.update_task_state(extra_meta=current_step)
+
+    # Perform the upload
+    upload_csv_to_report_store(rows, 'problem_grade_report', course_id, start_date)
+    return task_progress.update_task_state(extra_meta={'step': 'Uploading CSV'})
 
 
 def upload_students_csv(_xmodule_instance_args, _entry_id, course_id, task_input, action_name):
