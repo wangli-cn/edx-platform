@@ -16,14 +16,6 @@ from discussion_api.api import get_course_topics
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
 
 
-def _make_error_response(status_code, developer_message):
-    """
-    Return an error response with the given status code and developer
-    message
-    """
-    return Response({"developer_message": developer_message}, status=status_code)
-
-
 class CourseTopicsView(DeveloperErrorViewMixin, APIView):
     """
     **Use Cases**
