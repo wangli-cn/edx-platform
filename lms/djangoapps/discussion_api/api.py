@@ -23,20 +23,9 @@ def get_course_topics(course, user, build_absolute_uri):
 
     Returns:
 
-    A course topic listing dictionary with the following items:
-
-    courseware_topics: The list of topic trees for courseware-linked topics
-    non_courseware_toipcs: The list of topic tree that are not courseware-linked
-
-    Each topic tree has the following items:
-
-    id: The id of the discussion topic (null for a category that only has
-        children but cannot contain threads itself)
-    name: The display name of the discussion topic
-    thread_list_url: A URL to retrieve the threads that belong to the topic
-    children: A list of child subtrees
+    A course topic listing dictionary; see discussion_api.views.CourseTopicViews
+    for more detail.
     """
-
     # TODO: This is temporary until the discussion_api thread list view is implemented
     thread_list_path = reverse(
         "django_comment_client.forum.views.forum_form_discussion",

@@ -13,6 +13,7 @@ from opaque_keys.edx.locator import CourseLocator
 
 from courseware.courses import get_course_with_access
 from discussion_api.api import get_course_topics
+from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
 
 
 def _make_error_response(status_code, developer_message):
@@ -23,33 +24,34 @@ def _make_error_response(status_code, developer_message):
     return Response({"developer_message": developer_message}, status=status_code)
 
 
-class CourseTopicsView(APIView):
+class CourseTopicsView(DeveloperErrorViewMixin, APIView):
     """
-    A read-only endpoint to retrieve the topic listing for a user in a course.
+    **Use Cases**
 
-    The course_id in the URL is used to look up a course, and the authenticated
-    user is used for access control.
+        Retrieve the topic listing for a course. Only topics accessible to the
+        authenticated user are included.
 
-    Response:
+    **Example Requests**:
 
-    A course topic listing with the following items:
+        GET /api/discussion/v1/course_topics/{course_id}
 
-    courseware_topics: The list of topic trees for courseware-linked topics
-    non_courseware_toipcs: The list of topic tree that are not courseware-linked
+    **Response Values**:
 
-    Each topic tree has the following items:
+        * courseware_topics: The list of topic trees for courseware-linked
+          topics. Each item in the list includes:
 
-    id: The id of the discussion topic (null for a category that only has
-        children but cannot contain threads itself)
-    name: The display name of the discussion topic
-    thread_list_url: A URL to retrieve the threads that belong to the topic
-    children: A list of child subtrees
+            * id: The id of the discussion topic (null for a topic that only
+              has children but cannot contain threads itself).
 
-    Errors:
-    401: if the request is not authenticated
-    404: if the course_id does not identify a valid course or if the user does
-        not have access to the course (i.e. is not enrolled)
-    405: if a method other than OPTIONS, HEAD, or GET is specified
+            * name: The display name of the topic.
+
+            * thread_list_url: The URL from which the list of threads in the
+              topic can be retrieved.
+
+            * children: A list of child subtrees of the same format.
+
+        * non_courseware_topics: The list of topic trees that are not linked to
+              courseware. Items are of the same format as in courseware_topics.
     """
     authentication_classes = (OAuth2Authentication, SessionAuthentication)
     permission_classes = (IsAuthenticated,)
@@ -58,13 +60,3 @@ class CourseTopicsView(APIView):
         course_key = CourseLocator.from_string(course_id)
         course = get_course_with_access(request.user, 'load_forum', course_key)
         return Response(get_course_topics(course, request.user, request.build_absolute_uri))
-
-    def handle_exception(self, exc):
-        if isinstance(exc, NotAuthenticated):
-            return _make_error_response(401, "Request must be authenticated")
-        elif isinstance(exc, Http404):
-            return _make_error_response(404, "Course not found")
-        elif isinstance(exc, MethodNotAllowed):
-            return _make_error_response(405, "Only GET, OPTIONS, and HEAD are allowed")
-        else:
-            return super(CourseTopicsView, self).handle_exception(exc)

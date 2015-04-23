@@ -217,6 +217,17 @@ class GetCourseTopicsTest(UrlResetMixin, ModuleStoreTestCase):
         self.assertEqual(actual, expected)
 
     def test_access_control(self):
+        """
+        Test that only topics that a user has access to are returned. The
+        ways in which a user may not have access are:
+
+        * Module is visible to staff only
+        * Module has a start date in the future
+        * Module is accessible only to a group the user is not in
+
+        Also, there is a case that ensures that a category with no accessible
+        subcategories does not appear in the result.
+        """
         beta_tester = BetaTesterFactory.create(course_key=self.course.id)
         staff = StaffFactory.create(course_key=self.course.id)
         for user, group_idx in [(self.user, 0), (beta_tester, 1)]:

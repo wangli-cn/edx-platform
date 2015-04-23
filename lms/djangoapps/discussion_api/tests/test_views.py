@@ -49,7 +49,7 @@ class CourseTopicsViewTest(UrlResetMixin, ModuleStoreTestCase):
         self.assert_response_correct(
             response,
             401,
-            {"developer_message": "Request must be authenticated"}
+            {"developer_message": "Authentication credentials were not provided."}
         )
 
     def test_non_existent_course(self):
@@ -59,7 +59,7 @@ class CourseTopicsViewTest(UrlResetMixin, ModuleStoreTestCase):
         self.assert_response_correct(
             response,
             404,
-            {"developer_message": "Course not found"}
+            {"developer_message": "Not found."}
         )
 
     def test_not_enrolled(self):
@@ -69,7 +69,7 @@ class CourseTopicsViewTest(UrlResetMixin, ModuleStoreTestCase):
         self.assert_response_correct(
             response,
             404,
-            {"developer_message": "Course not found"}
+            {"developer_message": "Not found."}
         )
 
     def test_get(self):
@@ -90,13 +90,3 @@ class CourseTopicsViewTest(UrlResetMixin, ModuleStoreTestCase):
                 }],
             }
         )
-
-    def test_methods_not_allowed(self):
-        for method in ["post", "put", "delete"]:  # TODO add patch when we upgrade django
-            func = getattr(self.client, method)
-            response = func(self.url)
-            self.assert_response_correct(
-                response,
-                405,
-                {"developer_message": "Only GET, OPTIONS, and HEAD are allowed"}
-            )
