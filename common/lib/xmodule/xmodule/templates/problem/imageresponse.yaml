@@ -13,6 +13,8 @@ data: |
   <a href="http://edx.readthedocs.org/projects/edx-partner-course-staff/en/latest/exercises_tools/image_mapped_input.html" target="_blank">Image Mapped Input
   Problem</a> in <i>Building and Running an edx Course</i>.
   </p>
+  <p>When you add the problem, be sure to select <strong>Settings</strong> 
+  to specify a <strong>Display Name</strong> and other values that apply.</p>
   <p>You can use the following example problem as a model.</p>
   <p>_____________________________________________________________________________</p>
   

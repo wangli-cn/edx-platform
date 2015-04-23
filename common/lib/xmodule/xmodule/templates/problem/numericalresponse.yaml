@@ -4,7 +4,9 @@ metadata:
     markdown: |
         In a numerical input problem, learners enter numbers or a specific and relatively simple mathematical expression. Learners enter the response in plain text, and the system then converts the text to a symbolic expression that learners can see below the response field.
 
-        The system can handle several types of characters, including basic operators, fractions, exponents, and common constants such as "i". Learners can see "Entering Mathematical and Scientific Expressions" in the edX Guide for Students for information about how to enter text into the field.
+        The system can handle several types of characters, including basic operators, fractions, exponents, and common constants such as "i". You can refer learners to "Entering Mathematical and Scientific Expressions" in the edX Guide for Students for more information.
+
+        When you add the problem, be sure to select Settings to specify a Display Name and other values that apply.
 
         You can use the following example problems as models.
         _____________________________________________________________________________
@@ -25,16 +27,19 @@ metadata:
 data: |
     <problem>
 
-    <p>In a numerical response problem, learners enter numbers or a specific and
+    <p>In a numerical input problem, learners enter numbers or a specific and
     relatively simple mathematical expression. Learners enter the response in
     plain text, and the system then converts the text to a symbolic expression
     that learners can see below the response field.</p>
 
     <p>The system can handle several types of characters, including basic
-    operators, fractions, exponents, and common constants such as i. Learners
-    can see "Entering Mathematical and Scientific Expressions" in the edX
-    Guide for Students for information about how to enter text into the
-    field.</p>
+    operators, fractions, exponents, and common constants such as i. You can 
+    refer learners to 
+    <a href="http://edx.readthedocs.org/projects/edx-guide-for-students/en/latest/SFD_mathformatting.html" target="_blank">
+    Entering Mathematical and Scientific Expressions</a> in the <i>edX Guide for
+    Students</i> for information about how to enter text into the field.</p>
+    <p>When you add the problem, be sure to select <strong>Settings</strong> 
+    to specify a <strong>Display Name</strong> and other values that apply.</p>
 
     <p>You can use the following example problems as models.</p>
     <p>_____________________________________________________________________________</p>

@@ -4,7 +4,7 @@ metadata:
     source_code: |
         % Nearly any kind of edX problem can be authored using LaTeX as
         % the source language.  Write LaTeX as usual, including equations. The
-        % key new feature is the \edXabox{} macro, which specifies an "answer
+        % key feature is the \edXabox{} macro, which specifies an "answer
         % box" that queries students for a response, and specifies what the
         % expected (correct) answer is.
 
@@ -89,9 +89,9 @@ metadata:
 data: |
     <?xml version="1.0"?>
     <problem showanswer="closed" rerandomize="never" weight="10" display_name="lec1_Q2">
-      <p>If you have an problem that is already written in LaTeX, you can use this problem type to 
+      <p>If you have a problem that is already written in LaTeX, you can use this problem type to 
       easily convert your code into XML. After you paste your code into the LaTeX editor, 
-      you'll only need to make a few minor adjustments.</p>
+      you only need to make a few minor adjustments.</p>
       <p>For more information, see 
       <a href="http://edx.readthedocs.org/projects/edx-partner-course-staff/en/latest/exercises_tools/problem_in_latex.html" target="_blank">
       Problem Written in LaTeX</a> in <i>Building and Running an edX Course</i>.</p>

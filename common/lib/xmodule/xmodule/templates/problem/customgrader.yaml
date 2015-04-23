@@ -26,6 +26,8 @@ data: |
       href="http://edx.readthedocs.org/projects/edx-partner-course-staff/en/latest/exercises_tools/custom_python.html" target="_blank">
       Write-Your-Own-Grader Problem</a> in <i>Building and Running an edX Course</i>.
       </p>      
+      <p>When you add the problem, be sure to select <strong>Settings</strong> 
+        to specify a <strong>Display Name</strong> and other values that apply.</p>
       <p>You can use the following example problem as a model.</p>
       <p>______________________________________________________________________________</p>
 
@@ -62,7 +64,10 @@ data: |
           <p>Explanation</p>
           <p>Any set of integers on the line \(y = 10 - x\) and \(y = 20 - x\) satisfy these constraints.</p>
           <p>To add an image to the solution, use an HTML "img" tag. Make sure to include alt text.</p>
-          <img src="/static/images/placeholder-image.png" width="400" alt="Description of image"/>
+          <img src="/static/images/placeholder-image.png" width="400" 
+          alt="Description of image, with a primary goal of explaining its 
+          relevance to the problem or concept being illustrated for someone 
+          who is unable to see the image."/>
         </div>
       </solution>
       </problem>
