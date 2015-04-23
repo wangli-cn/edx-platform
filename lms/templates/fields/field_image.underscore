@@ -1,10 +1,10 @@
-<div class="image-wrapper">
+<div class="image-wrapper" tabindex="0">
     <img class="image-frame" src="<%- imageUrl %>"  alt="<%=imageAltText%>"/>
     <div class="u-field-actions">
         <label class="u-field-upload-button">
             <span class="upload-button-icon" aria-hidden="true"><%= uploadButtonIcon %></span>
             <span class="upload-button-title" aria-live="polite"><%= uploadButtonTitle %></span>
-            <input class="upload-button-input" type="file" name="<%= inputName %>"/>
+            <input class="upload-button-input" aria-hidden="true" type="file" name="<%= inputName %>"/>
        	</label>
        	<button class="upload-submit" type="button" hidden="true"><%= uploadButtonTitle %></button>
         

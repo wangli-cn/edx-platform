@@ -88,17 +88,20 @@
                 margin-top: 2px;
                 text-align: center;
 
-                &:focus, &:active {
+                &:active {
                     box-shadow: none;
                     outline: 0;
                 }
+                &:focus {
+                    box-shadow: none;
+                    outline: 0;
+                    @include show-hover-state();
+                }
             }
 
-            &:hover {
+            &:hover, &:focus {
                 .u-field-upload-button, .u-field-remove-button {
-                    opacity: 1;
-                    background-color: $shadow-d2;
-                    border-radius: ($baseline/4);
+                    @include show-hover-state();
                 }
             }
         }
