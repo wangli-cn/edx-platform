@@ -243,6 +243,7 @@ $sequence--border-color: #C8C8C8;
   position: absolute;
   display: block;
   top: 0;
+  width: ($baseline*2);
   height: 46px;
 
   &.button-previous {
@@ -271,7 +272,7 @@ $sequence--border-color: #C8C8C8;
 
 nav.sequence-bottom {
   position: relative;
-  width: 93px;
+  width: 79px;
   height: 1px;
   margin: lh(2) auto;
   text-align: center;
