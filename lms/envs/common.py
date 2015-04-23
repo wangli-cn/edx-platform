@@ -380,6 +380,9 @@ FEATURES = {
         'TWITTER_SHARING': False,
         'TWITTER_SHARING_TEXT': None
     },
+
+    # Course discovery feature
+    'ENABLE_COURSE_DISCOVERY': False,
 }
 
 # Ignore static asset files on import which match this pattern
@@ -2244,3 +2247,11 @@ CHECKPOINT_PATTERN = r'(?P<checkpoint_name>\w+)'
 # 'courseware.student_field_overrides.IndividualStudentOverrideProvider' to
 # this setting.
 FIELD_OVERRIDE_PROVIDERS = ()
+
+# Sets the maximum number of courses listed on the homepage
+# If set to None, all courses will be listed on the homepage
+HOMEPAGE_COURSE_COUNT = 9
+
+if not FEATURES.get('ENABLE_COURSE_DISCOVERY'):
+    # if COURSE DISCOVERY feature is disabled, all courses should be listed on the homepage
+    HOMEPAGE_COURSE_COUNT = None
