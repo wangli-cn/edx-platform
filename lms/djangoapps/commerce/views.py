@@ -3,12 +3,14 @@ import logging
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
-
+from django.views.generic import TemplateView
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_406_NOT_ACCEPTABLE, HTTP_202_ACCEPTED, HTTP_409_CONFLICT
 from rest_framework.views import APIView
+from xmodule.modulestore.django import modulestore
 
 from commerce.api import EcommerceAPI
 from commerce.constants import OrderStatus, Messages
@@ -16,11 +18,13 @@ from commerce.exceptions import ApiError, InvalidConfigurationError
 from commerce.http import DetailResponse, InternalRequestErrorResponse
 from course_modes.models import CourseMode
 from courseware import courses
-from edxmako.shortcuts import render_to_response
+from edxmako.shortcuts import render_to_response as mako_render_to_response
 from enrollment.api import add_enrollment
 from microsite_configuration import microsite
 from student.models import CourseEnrollment
 from openedx.core.lib.api.authentication import SessionAuthenticationAllowInactiveUser
+from util.date_utils import get_default_time_display
+from util.json_request import JsonResponse
 
 
 log = logging.getLogger(__name__)
@@ -134,4 +138,53 @@ class OrdersView(APIView):
 def checkout_cancel(_request):
     """ Checkout/payment cancellation view. """
     context = {'payment_support_email': microsite.get_value('payment_support_email', settings.PAYMENT_SUPPORT_EMAIL)}
-    return render_to_response("commerce/checkout_cancel.html", context)
+    return mako_render_to_response("commerce/checkout_cancel.html", context)
+
+
+class CheckoutReceiptView(TemplateView):
+    template_name = 'commerce/checkout_receipt.html'
+
+    def get_context_data(self, **kwargs):
+        data = super(CheckoutReceiptView, self).get_context_data(**kwargs)
+        basket_id = self.request.GET.get('basket_id')
+
+        order = None
+        course_id = None
+        course_name = None
+
+        if basket_id:
+            _order_id, _order_status, order = EcommerceAPI().get_basket_order(self.request.user, basket_id)
+
+            # Format the order placement date
+            order['date_placed'] = get_default_time_display(order['date_placed'])
+
+            # Get the course_id
+            for line in order['lines']:
+                attributes = line['product']['attribute_values']
+                for attribute in attributes:
+                    if attribute['name'] == 'course_key':
+                        course_id = attribute['value']
+
+            # Get the course name
+            course_key = CourseKey.from_string(course_id)
+            course = modulestore().get_course(course_key)
+            course_name = course.display_name
+
+        data.update({
+            'order': order,
+            'course_id': course_id,
+            'course_name': course_name,
+            'platform_name': settings.PLATFORM_NAME
+        })
+        return data
+
+
+class BasketOrderView(APIView):
+    """ Retrieve the order associated with a basket. """
+
+    authentication_classes = (SessionAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        _order_id, _order_status, order = EcommerceAPI().get_basket_order(request.user, kwargs['basket_id'])
+        return JsonResponse(order)

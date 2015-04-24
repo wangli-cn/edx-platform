@@ -43,7 +43,7 @@
             <tfoot>
               <tr>
                 <th scope="row" class="total-label" colspan="1"><%- gettext( "Total" ) %></th>
-                <td claass="total-value" colspan="3">
+                <td class="total-value" colspan="3">
                   <span class="value-amount"><%- receipt.totalCost %></span>
                    <span class="value-currency">(<%- receipt.currency.toUpperCase() %>)</span>
                 </td>
