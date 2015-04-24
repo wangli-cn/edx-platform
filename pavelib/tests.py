@@ -1,6 +1,7 @@
 """
 Unit test tasks
 """
+import glob
 import os
 import sys
 from paver.easy import sh, task, cmdopts, needs, call_task
@@ -202,6 +203,20 @@ def coverage(options):
             ))
 
     call_task('diff_coverage', options=dict(options))
+
+
+@task
+@needs('pavelib.prereqs.install_prereqs')
+def combine_coverage():
+    """
+    Combine coverage reports.
+    """
+    for directory in Env.LIB_TEST_DIRS + ['cms', 'lms']:
+        report_dir = Env.REPORT_DIR / directory
+        data_files = glob.glob("{}/**/.coverage.*".format(report_dir))
+        for f in data_files:
+            os.rename(f, report_dir / f.basename())
+        sh("cd {}; coverage combine".format(report_dir))
 
 
 @task

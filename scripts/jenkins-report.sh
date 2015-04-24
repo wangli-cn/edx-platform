@@ -2,6 +2,7 @@
 source scripts/jenkins-common.sh
 
 # Run coverage again to get the diff coverage report
+paver combine_coverage
 paver diff_coverage
 
 # JUnit test reporter will fail the build
