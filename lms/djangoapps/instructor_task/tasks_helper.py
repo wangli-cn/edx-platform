@@ -6,6 +6,7 @@ running state of a course.
 import json
 from collections import OrderedDict
 from datetime import datetime
+from eventtracking import tracker
 from time import time
 import unicodecsv
 import logging
@@ -49,6 +50,9 @@ UNKNOWN_TASK_ID = 'unknown-task_id'
 UPDATE_STATUS_SUCCEEDED = 'succeeded'
 UPDATE_STATUS_FAILED = 'failed'
 UPDATE_STATUS_SKIPPED = 'skipped'
+
+# The setting name used for events when "settings" (account settings, preferences, profile information) change.
+REPORT_REQUESTED_EVENT_NAME = u'edx.instructor.report.requested'
 
 
 class BaseInstructorTask(Task):
@@ -547,6 +551,12 @@ def upload_csv_to_report_store(rows, csv_name, course_id, timestamp):
             timestamp_str=timestamp.strftime("%Y-%m-%d-%H%M")
         ),
         rows
+    )
+    tracker.emit(
+        REPORT_REQUESTED_EVENT_NAME,
+        {
+            "report_type": csv_name,
+        }
     )
 
 
