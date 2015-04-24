@@ -3,7 +3,7 @@
  */
 var edx = edx || {};
 
-(function( $, _, gettext, interpolate ) {
+(function( $, _, gettext, interpolate_text ) {
     'use strict';
 
     edx.verify_student = edx.verify_student || {};
@@ -28,20 +28,35 @@ var edx = edx || {};
             };
         },
 
+        _getProductText: function( modeSlug, isUpgrade ) {
+            switch ( modeSlug ) {
+                case "professional":
+                    return gettext( "Professional Education Verified Certificate" );
+                case "no-id-professional":
+                    return gettext( "Professional Education" );
+                default:
+                    if ( isUpgrade ) {
+                        return gettext( "Verified Certificate upgrade" );
+                    } else {
+                        return gettext( "Verified Certificate" );
+                    }
+            }
+        },
+
         _getPaymentButtonText: function(processorName) {
             if (processorName.toLowerCase().substr(0, 11)=='cybersource') {
                 return gettext('Pay with Credit Card');
             } else {
                 // This is mainly for testing as no other processors are supported right now.
                 // Translators: 'processor' is the name of a third-party payment processing vendor (example: "PayPal")
-                return interpolate(gettext('Pay with %(processor)s'), [processorName]);
+                return interpolate_text(gettext('Pay with {processor}'), {processor: processorName});
             }
         },
 
         _getPaymentButtonHtml: function(processorName) {
             var self = this;
             return _.template(
-                '<a class="next action-primary payment-button" id="<%- name %>" tab-index="0">"<%- text %>"</a> '
+                '<a class="next action-primary payment-button" id="<%- name %>" tab-index="0"><%- text %></a> '
             )({name: processorName, text: self._getPaymentButtonText(processorName)});
         },
 
@@ -76,6 +91,11 @@ var edx = edx || {};
                 // radio buttons, so we need to enable the radio button.
                 this.setPaymentEnabled( true );
             }
+
+            // render the name of the product being paid for
+            $( 'div.payment-buttons span.product').append(
+                self._getProductText( templateContext.courseModeSlug, templateContext.upgrade )
+            );
 
             // create a button for each payment processor
             _.each(templateContext.processors, function(processorName) {
@@ -229,4 +249,4 @@ var edx = edx || {};
 
     });
 
-})( jQuery, _, gettext, interpolate );
+})( jQuery, _, gettext, interpolate_text );

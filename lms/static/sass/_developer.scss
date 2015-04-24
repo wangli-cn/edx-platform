@@ -50,3 +50,22 @@
   padding: ($baseline*1.5) $baseline;
   text-align: center;
 }
+
+// for verify_student/make_payment_step.underscore
+div.payment-buttons {
+
+  div.purchase {
+    float: left;
+
+    p, span {
+      line-height: 46px;
+      font-weight: bolder;
+      color: rgb(60, 60, 60);  // fixes the word "price"
+    }
+  }
+
+  a.payment-button {
+    float: right;
+    margin-left: 10px;
+  }
+}

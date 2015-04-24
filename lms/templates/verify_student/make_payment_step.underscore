@@ -100,8 +100,14 @@
   <% if ( isActive ) { %>
   <div class="payment-buttons nav-wizard is-ready center">
     <input type="hidden" name="contribution" value="<%- minPrice %>" />
-    <span>price: $<%- minPrice %></span>
-    <!-- payment buttons will go here -->
+    <div class="purchase">
+      <p><span class="product"></span> <%- gettext( "price" ) %>: <span class="price">$<%- minPrice %></span></p>
+    </div>
+    <div class="pay-options">
+      <%
+      // payment buttons will go here
+      %>
+    </div>
   </div>
   <% } %>
 
