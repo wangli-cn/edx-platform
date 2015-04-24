@@ -126,7 +126,6 @@ def get_threads(request, course, discussion_id=None, per_page=THREADS_PER_PAGE):
             )
         )
     )
-
     threads, page, num_pages, corrected_text = cc.Thread.search(query_params)
 
     # If not provided with a discussion id, filter threads by commentable ids

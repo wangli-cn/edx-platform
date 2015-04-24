@@ -30,7 +30,7 @@ from ...fixtures.discussion import (
     Response,
     Comment,
     SearchResult,
-)
+    MultipleThreadFixture)
 
 from .helpers import BaseDiscussionMixin
 
@@ -254,6 +254,36 @@ class DiscussionTabSingleThreadTest(BaseDiscussionTestCase, DiscussionResponsePa
         self.assertTrue(self.thread_page.is_comment_visible(comment_id))
         self.assertTrue(self.thread_page.is_add_comment_visible(response_id))
         self.assertFalse(self.thread_page.is_show_comments_visible(response_id))
+
+
+@attr('shard_1')
+class DiscussionTabMultipleThreadTest(BaseDiscussionTestCase):
+    """
+    Tests for the discussion page with multiple threads
+    """
+    def setUp(self):
+        super(DiscussionTabMultipleThreadTest, self).setUp()
+        AutoAuthPage(self.browser, course_id=self.course_id).visit()
+
+    def setup_thread_page(self, thread_id):
+        self.thread_page = self.create_single_thread_page(thread_id)  # pylint: disable=attribute-defined-outside-init
+        self.thread_page.visit()
+
+    def setup_multiple_threads(self, thread_count):
+        threads = []
+        thread_id = ''
+        for i in range(thread_count):
+            thread_id = "test_thread_{}_{}".format(i, uuid4().hex)
+            threads.append(
+                Thread(id=thread_id, commentable_id=self.discussion_id),
+
+            )
+        view = MultipleThreadFixture(threads)
+        view.push()
+        self.setup_thread_page(thread_id)
+
+    def test_page_scroll_on_thread_change_view(self):
+        self.setup_multiple_threads(thread_count=2)
 
 
 @attr('shard_1')
