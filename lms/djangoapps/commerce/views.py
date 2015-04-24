@@ -125,7 +125,7 @@ class BasketsView(APIView):
                 msg = u'Unexpected response from basket endpoint.'
                 log.error(
                     msg + u' Could not enroll user %(username)s in course %(course_id)s.',
-                    {'username': user.username, 'course_id': course_id},
+                    {'username': user.id, 'course_id': course_id},
                 )
                 raise InvalidResponseError(msg)
         except ApiError as err:

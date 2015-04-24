@@ -957,6 +957,7 @@ class CheckoutTestMixin(object):
     def test_old_clients(self, patched_create_order):
         # ensure the response to a request from a stale js client is modified so as
         # not to break behavior in the browser.
+        # (XCOM-214) remove after release.
         expected_payment_data = EcommerceApiTestMixin.PAYMENT_DATA.copy()
         expected_payment_data['payment_form_data'].update({'foo': 'bar'})
         patched_create_order.return_value = expected_payment_data

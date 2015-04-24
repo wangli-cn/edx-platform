@@ -776,7 +776,7 @@ def create_order(request):
         payment_data = checkout_with_shoppingcart(request, request.user, course_id, current_mode, amount)
 
     if 'processor' not in request.POST:
-        # To be removed after release.
+        # (XCOM-214) To be removed after release.
         # the absence of this key in the POST payload indicates that the request was initiated from
         # a stale js client, which expects a response containing only the 'payment_form_data' part of
         # the payment data result.

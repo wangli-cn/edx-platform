@@ -293,6 +293,8 @@ class OrdersViewTests(BasketsViewTests):
     """
     Ensures that /orders/ points to and behaves like /baskets/, for backward
     compatibility with stale js clients during updates.
+
+    (XCOM-214) remove after release.
     """
     def setUp(self):
         super(OrdersViewTests, self).setUp()
