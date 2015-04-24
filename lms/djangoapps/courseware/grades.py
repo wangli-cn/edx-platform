@@ -574,5 +574,5 @@ def iterate_problem_grades_for(students, course_key, problems):
         for chapter in summary:
             for section in chapter['sections']:
                 for score in section['scores']:
-                    student_problems[score.module_id] = float(score.earned)/score.possible
+                    student_problems[score.module_id] = float(score.earned) / score.possible
         yield student, student_problems.values()

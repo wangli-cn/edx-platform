@@ -728,7 +728,7 @@ def upload_problem_grade_report(_xmodule_instance_args, _entry_id, course_id, _t
                 header_name = "{}".format(blocks[block]['display_name'])
                 problems[block] = header_name
     # TODO: Do something more reasonable here
-    except errors.CourseStructureNotAvailableError as error:
+    except errors.CourseStructureNotAvailableError:
         return task_progress.update_task_state(extra_meta={'step': 'Waiting for course structure'})
 
     # Just generate the static fields for now.
