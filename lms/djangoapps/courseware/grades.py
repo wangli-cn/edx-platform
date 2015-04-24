@@ -544,3 +544,35 @@ def iterate_grades_for(course_or_id, students):
                     exc.message
                 )
                 yield student, {}, exc.message
+
+
+def iterate_problem_grades_for(students, course_key, problems):
+    """Create a generator for iterating over all the students and generating a list of weighted grades for the user
+
+    Args:
+        students (User): the students iterator that we are iterating over
+        course_key (Course): the course_key for the course that the student is being graded on
+        problems (OrderedDict): a dictionary with the problem_ids mapped to zero
+
+    Returns: TODO
+
+    """
+    student_problems = problems.copy()
+    course = courses.get_course_by_id(course_key)
+    # We make a fake request because grading code expects to be able to look at
+    # the request. We have to attach the correct user to the request before
+    # grading that student.
+    request = RequestFactory().get('/')
+    for student in students:
+        request.user = student
+        # Grading calls problem rendering, which calls masquerading,
+        # which checks session vars -- thus the empty session dict below.
+        # It's not pretty, but untangling that is currently beyond the
+        # scope of this feature.
+        request.session = {}
+        summary = progress_summary(student, request, course)
+        for chapter in summary:
+            for section in chapter['sections']:
+                for score in section['scores']:
+                    student_problems[score.module_id] = float(score.earned)/score.possible
+        yield student, student_problems.values()

@@ -23,9 +23,10 @@ from track.views import task_track
 from util.file import course_filename_prefix_generator, UniversalNewlineIterator
 from xmodule.modulestore.django import modulestore
 from xmodule.split_test_module import get_split_user_partitions
+from course_structure_api.v0 import api, errors
 
 from courseware.courses import get_course_by_id, get_problems_in_section
-from courseware.grades import iterate_grades_for
+from courseware.grades import iterate_grades_for, iterate_problem_grades_for
 from courseware.models import StudentModule
 from courseware.model_data import FieldDataCache
 from courseware.module_render import get_module_for_descriptor_internal
@@ -718,13 +719,32 @@ def upload_problem_grade_report(_xmodule_instance_args, _entry_id, course_id, _t
     #   - First append their static fields
     #   - Then iterate through each problem column, appending grade if appropriate
 
+    try:
+        course_structure = api.course_structure(course_id)
+        blocks = course_structure['blocks']
+        problems = OrderedDict()
+        for block in blocks:
+            if blocks[block]['type'] == 'problem':
+                header_name = "{}".format(blocks[block]['display_name'])
+                problems[block] = header_name
+    # TODO: Do something more reasonable here
+    except errors.CourseStructureNotAvailableError as error:
+        return task_progress.update_task_state(extra_meta={'step': 'Waiting for course structure'})
+
     # Just generate the static fields for now.
-    rows = [[display_name for display_name in header_row.values()]]
+    rows = [list(header_row.values()) + list(problems.values())]
     current_step = {'step': 'Calculating Grades'}
-    for student in enrolled_students:
-        rows.append([getattr(student, field_name) for field_name in header_row])
-        task_progress.attempted +=1
-        task_progress.succeeded +=1
+    # zero out problems dictionary.
+    for problem in problems:
+        problems[problem] = 0
+
+    for student, student_problem_values in iterate_problem_grades_for(enrolled_students, course_id, problems):
+        new_row = [getattr(student, field_name) for field_name in header_row]
+        new_row = new_row + student_problem_values
+        rows.append(new_row)
+
+        task_progress.attempted += 1
+        task_progress.succeeded += 1
         if task_progress.attempted % status_interval == 0:
             task_progress.update_task_state(extra_meta=current_step)
 
