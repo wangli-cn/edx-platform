@@ -976,7 +976,6 @@ class CheckoutTestMixin(object):
         self.assertEqual(data, {'foo': 'bar'})
 
 
-
 @patch('verify_student.views.checkout_with_shoppingcart', return_value=EcommerceApiTestMixin.PAYMENT_DATA)
 class TestCreateOrderShoppingCart(CheckoutTestMixin, ModuleStoreTestCase):
     """ Test view behavior when the shoppingcart is used. """
@@ -986,8 +985,7 @@ class TestCreateOrderShoppingCart(CheckoutTestMixin, ModuleStoreTestCase):
         return ''
 
     def _get_checkout_args(self, patched_create_order):
-        """ Assuming patched_create_order was called, return a mapping containing the call arguments.
-        """
+        """ Assuming patched_create_order was called, return a mapping containing the call arguments."""
         return dict(zip(('request', 'user', 'course_key', 'course_mode', 'amount'), patched_create_order.call_args[0]))
 
 

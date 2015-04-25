@@ -82,19 +82,24 @@ class EcommerceAPI(object):
         return self._call_ecommerce_service(get)
 
     def create_basket(self, user, sku, payment_processor=None):
-        """
-        Create a new basket and immediately trigger checkout.
+        """Create a new basket and immediately trigger checkout.
 
         Note that while the API supports deferring checkout to a separate step,
         as well as adding multiple products to the basket, this client does not
         currently need that capability, so that case is not supported.
 
-        Arguments
-            user                     --  User for which the basket should be created.
-            sku                      --  SKU of the course seat being ordered.
-            payment_processor        --  Name of the payment processor to use.
+        Args:
+            user: the django.auth.User for which the basket should be created.
+            sku: a string containing the SKU of the course seat being ordered.
+            payment_processor: (optional) the name of the payment processor to
+                use for checkout.
 
-        Returns a dictionary containing {id, order, payment_data}.
+        Returns:
+            A dictionary containing {id, order, payment_data}.
+
+        Raises:
+            TimeoutError: the request to the API server timed out.
+            InvalidResponseError: the API server response was not understood.
         """
         def create():
             """Internal service call to create a basket. """
