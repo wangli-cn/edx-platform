@@ -49,6 +49,10 @@ def view_student_survey(user, survey_name, course=None, redirect_url=None, is_re
     # just remove that outer key to make the JSON payload simplier
     existing_answers = survey.get_answers(user=user).get(user.id, {})
 
+    platform_name = microsite.get_value('platform_name', settings.PLATFORM_NAME)
+    possessive_format = "'" if platform_name.endswith("s") else "'s"
+    possessive_platform_name = platform_name + possessive_format
+
     context = {
         'existing_data_json': json.dumps(existing_answers),
         'postback_url': reverse('submit_answers', args=[survey_name]),
@@ -58,6 +62,7 @@ def view_student_survey(user, survey_name, course=None, redirect_url=None, is_re
         'survey_form': survey.form,
         'is_required': is_required,
         'mail_to_link': microsite.get_value('email_from_address', settings.CONTACT_EMAIL),
+        'possessive_platform_name': possessive_platform_name,
         'course': course,
     }
 
